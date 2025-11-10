@@ -3,7 +3,38 @@
 A distributed event-driven backend microservices platform built with .NET 8, implementing Clean Architecture, Domain-Driven Design (DDD), and CQRS patterns.
 
 ## 🏗️ Architecture
+```mermaid
+flowchart LR
+  subgraph API Gateway
+    A[Orders API]
+  end
 
+  subgraph Message Broker
+    MQ((RabbitMQ))
+  end
+
+  subgraph Services
+    B[Inventory Service]
+    C[Payments Service]
+    D[Checkout Orchestrator]
+  end
+
+  subgraph Databases
+    PG[(PostgreSQL - Relational)]
+    MG[(MongoDB - Read Models)]
+    RS[(Redis - Cache)]
+  end
+
+  A -->|OrderCreated| MQ
+  MQ --> B
+  MQ --> C
+  MQ --> D
+  D -->|Saga Events| MQ
+  A --> PG
+  B --> MG
+  C --> PG
+  A --> RS
+```
 Mercury Platform is a microservices-based e-commerce backend system consisting of four main services:
 
 - **Orders API**: Manages order creation, processing, and tracking (PostgreSQL)
