@@ -1,4 +1,4 @@
-# Mercury Platform
+## 🪐 **Mercury Platform**
 
 A distributed event-driven backend microservices platform built with .NET 8, implementing Clean Architecture, Domain-Driven Design (DDD), and CQRS patterns.
 
