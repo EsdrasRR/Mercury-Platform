@@ -104,7 +104,7 @@ flowchart LR
 #### Run with Docker
 
 ```bash
-git clone https://github.com/yourusername/mercury-platform.git
+git clone https://github.com/esdrasrr/mercury-platform.git
 cd mercury-platform
 docker-compose up --build
 ```
