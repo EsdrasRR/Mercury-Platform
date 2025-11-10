@@ -1,250 +1,267 @@
 ## 🪐 **Mercury Platform**
 
-### *A distributed event-driven backend architecture built with .NET 8, RabbitMQ, PostgreSQL, MongoDB, and Redis.*
+A distributed event-driven backend microservices platform built with .NET 8, implementing Clean Architecture, Domain-Driven Design (DDD), and CQRS patterns.
 
----
+## 🏗️ Architecture
 
-### 🦭 Overview
+Mercury Platform is a microservices-based e-commerce backend system consisting of four main services:
 
-**Mercury Platform** is an advanced **backend microservices system** designed to demonstrate clean architecture, event-driven communication, and modern cloud-ready design patterns.
-It integrates **RabbitMQ** for asynchronous message processing, leverages **CQRS + DDD** for domain separation, and uses **three database technologies** — relational, document, and cache — to achieve performance and scalability.
+- **Orders API**: Manages order creation, processing, and tracking (PostgreSQL)
+- **Inventory API**: Handles product inventory and stock management (MongoDB)
+- **Payments API**: Processes payments and transactions (PostgreSQL)
+- **Checkout Orchestrator**: Coordinates the checkout process across services (MongoDB)
 
-The platform simulates an **order processing system**, orchestrating multiple services (Orders, Payments, Inventory) through **events, sagas, and message queues**.
+### Technology Stack
 
----
+- **.NET 8**: Latest LTS version of .NET
+- **Clean Architecture**: Separation of concerns with Domain, Application, Infrastructure, and API layers
+- **DDD (Domain-Driven Design)**: Rich domain models with business logic
+- **CQRS**: Command Query Responsibility Segregation using MediatR
+- **PostgreSQL**: Relational database for Orders and Payments
+- **MongoDB**: Document database for Inventory and Checkout
+- **Redis**: Distributed caching
+- **RabbitMQ**: Message broker for event-driven communication
+- **Docker**: Containerization for all services
+- **AutoMapper**: Object-to-object mapping
+- **Serilog**: Structured logging
+- **xUnit**: Unit testing framework
 
-### 🎗️ Architecture
+## 📁 Project Structure
 
-```mermaid
-flowchart LR
-  subgraph API Gateway
-    A[Orders API]
-  end
-
-  subgraph Message Broker
-    MQ((RabbitMQ))
-  end
-
-  subgraph Services
-    B[Inventory Service]
-    C[Payments Service]
-    D[Checkout Orchestrator]
-  end
-
-  subgraph Databases
-    PG[(PostgreSQL - Relational)]
-    MG[(MongoDB - Read Models)]
-    RS[(Redis - Cache)]
-  end
-
-  A -->|OrderCreated| MQ
-  MQ --> B
-  MQ --> C
-  MQ --> D
-  D -->|Saga Events| MQ
-  A --> PG
-  B --> MG
-  C --> PG
-  A --> RS
+```
+MercuryPlatform/
+├── src/
+│   ├── Services/
+│   │   ├── Orders/
+│   │   │   ├── Orders.API/           # REST API endpoints
+│   │   │   ├── Orders.Application/   # CQRS handlers, DTOs
+│   │   │   ├── Orders.Domain/        # Domain entities, value objects
+│   │   │   └── Orders.Infrastructure/ # EF Core, repositories
+│   │   ├── Inventory/
+│   │   │   ├── Inventory.API/
+│   │   │   ├── Inventory.Application/
+│   │   │   ├── Inventory.Domain/
+│   │   │   └── Inventory.Infrastructure/
+│   │   ├── Payments/
+│   │   │   ├── Payments.API/
+│   │   │   ├── Payments.Application/
+│   │   │   ├── Payments.Domain/
+│   │   │   └── Payments.Infrastructure/
+│   │   └── Checkout/
+│   │       ├── Checkout.API/
+│   │       ├── Checkout.Application/
+│   │       ├── Checkout.Domain/
+│   │       └── Checkout.Infrastructure/
+│   └── Shared/
+│       ├── Shared.Contracts/         # Event contracts, interfaces
+│       └── Shared.Infrastructure/    # Common infrastructure code
+├── tests/
+│   ├── Orders.UnitTests/
+│   ├── Inventory.UnitTests/
+│   ├── Payments.UnitTests/
+│   └── Checkout.UnitTests/
+├── docker-compose.yml
+└── MercuryPlatform.sln
 ```
 
----
+## 🚀 Getting Started
 
-### ⚙️ Tech Stack
+### Prerequisites
 
-| Category                 | Technology                                                          |
-| ------------------------ | ------------------------------------------------------------------- |
-| **Language / Framework** | C#, .NET 8 (ASP.NET Core Web API)                                   |
-| **Messaging**            | RabbitMQ (MassTransit integration)                                  |
-| **Databases**            | PostgreSQL (write model), MongoDB (read model), Redis (cache/store) |
-| **Architecture**         | CQRS, DDD, Saga, Event-Driven, Repository, Mediator                 |
-| **Libraries**            | MediatR, AutoMapper, EF Core, Polly, Serilog, OpenTelemetry         |
-| **Testing**              | xUnit, Moq, Testcontainers, Pact                                    |
-| **DevOps / CI**          | Docker, docker-compose, GitHub Actions, Terraform (IaC)             |
-| **Observability**        | Prometheus, Grafana, OpenTelemetry Tracing                          |
-| **Auth / Security**      | JWT / ASP.NET Identity (optional)                                   |
+- [.NET 8 SDK](https://dotnet.microsoft.com/download/dotnet/8.0)
+- [Docker Desktop](https://www.docker.com/products/docker-desktop)
+- [Git](https://git-scm.com/downloads)
 
----
+### Running with Docker Compose
 
-### 🔁 Core Features
-
-✅ Distributed event-driven communication
-
-✅ CQRS + DDD with isolated bounded contexts
-
-✅ Reliable event publishing (with outbox pattern)
-
-✅ Sagas for long-running orchestration (Order → Payment → Inventory)
-
-✅ Retry, Circuit Breaker, Idempotency
-
-✅ Redis caching and distributed locks
-
-✅ OpenTelemetry tracing and metrics
-
-✅ Integration tests using Testcontainers
-
-✅ Containerized environment with docker-compose
-
-✅ CI/CD pipeline with GitHub Actions
-
----
-
-### 🥫 Service Overview
-
-| Service                   | Description                                     | Primary Storage  |
-| ------------------------- | ----------------------------------------------- | ---------------- |
-| **Orders API**            | Manages order lifecycle, publishes events       | PostgreSQL       |
-| **Inventory Service**     | Handles stock levels, reacts to order events    | MongoDB          |
-| **Payments Service**      | Simulates payment authorization and capture     | PostgreSQL       |
-| **Checkout Orchestrator** | Implements Saga to coordinate distributed steps | RabbitMQ         |
-| **Notification Worker**   | Sends asynchronous notifications                | RabbitMQ + Redis |
-
----
-
-### 🐳 Local Setup
-
-#### Requirements
-
-* Docker & Docker Compose
-* .NET 8 SDK
-* Make (optional, for scripts)
-
-#### Run with Docker
-
+1. Clone the repository:
 ```bash
-git clone https://github.com/esdrasrr/mercury-platform.git
-cd mercury-platform
-docker-compose up --build
+git clone https://github.com/EsdrasRR/Mercury-Platform.git
+cd Mercury-Platform
 ```
 
-#### Available Services
-
-| Service             | URL                                                            |
-| ------------------- | -------------------------------------------------------------- |
-| Orders API          | [http://localhost:5000/swagger](http://localhost:5000/swagger) |
-| RabbitMQ Management | [http://localhost:15672](http://localhost:15672)               |
-| PostgreSQL          | localhost:5432                                                 |
-| MongoDB             | localhost:27017                                                |
-| Redis               | localhost:6379                                                 |
-
----
-
-### 🥪 Running Tests
-
+2. Build and run all services:
 ```bash
-dotnet test
+docker-compose up -d
 ```
 
-You can also run integration tests in containers:
+3. Access the services:
+- Orders API: http://localhost:5001
+- Inventory API: http://localhost:5002
+- Payments API: http://localhost:5003
+- Checkout API: http://localhost:5004
+- RabbitMQ Management: http://localhost:15672 (user: mercury, pass: mercury123)
 
+### Running Locally
+
+1. Start infrastructure services:
 ```bash
-dotnet test --filter Category=Integration
+docker-compose up -d postgres mongodb redis rabbitmq
 ```
 
----
-
-### 🛠️ CI/CD (GitHub Actions)
-
-The repository includes a workflow that:
-
-* Builds and tests all services
-* Runs code analysis (dotnet format, lint)
-* Builds and pushes Docker images
-* Deploys to a test environment (via Terraform/Helm)
-
----
-
-### 🔍 Observability
-
-| Tool              | Purpose                              |
-| ----------------- | ------------------------------------ |
-| **Serilog**       | Structured logging                   |
-| **OpenTelemetry** | Traces and metrics                   |
-| **Prometheus**    | Metrics scraping                     |
-| **Grafana**       | Dashboards                           |
-| **Health Checks** | `/health` endpoints for all services |
-
----
-
-### 🟞️ Roadmap
-
-* [x] Define base architecture
-* [x] Create dockerized infrastructure (Postgres, Mongo, Redis, RabbitMQ)
-* [ ] Implement Orders API + CQRS
-* [ ] Integrate RabbitMQ and event publishing
-* [ ] Add Inventory and Payments services
-* [ ] Implement Saga orchestration
-* [ ] Add OpenTelemetry tracing and metrics
-* [ ] Create GitHub Actions CI/CD
-* [ ] Publish documentation and demo video
-
----
-
-### 🧠 Design Patterns Used
-
-* Repository / Unit of Work
-* Mediator (MediatR)
-* Factory / Strategy (Payment Providers)
-* Saga (Order Orchestration)
-* CQRS (Command + Query separation)
-* Outbox Pattern (Reliable Event Publishing)
-* Retry / Circuit Breaker (Polly)
-* Distributed Cache / Lock (Redis)
-
----
-
-### 🧉 Example Command Flow
-
-1. **POST /orders** → `CreateOrderCommand`
-2. Orders service stores data in PostgreSQL
-3. Publishes `OrderCreated` event to RabbitMQ
-4. Inventory & Payments services process event
-5. Saga Orchestrator coordinates final state
-6. `OrderCompleted` event is published
-
----
-
-### 🏁 Project Structure (Preview)
-
-```
-/mercury-platform
- ├─ /docs
- ├─ /deploy
- ├─ /docker
- ├─ /services
- │   ├─ orders-api
- │   ├─ inventory-service
- │   ├─ payments-service
- │   ├─ checkout-orchestrator
- │   └─ workers/notification
- ├─ /libs
- │   ├─ common
- │   └─ domain
- ├─ /tests
- ├─ docker-compose.yml
- ├─ README.md
- └─ .github/workflows/ci.yml
+2. Build the solution:
+```bash
+dotnet build MercuryPlatform.sln
 ```
 
----
-
-### 📈 Example Badges (add after first CI setup)
-
-```
-![.NET](https://img.shields.io/badge/.NET-8.0-blue?logo=dotnet)
-![Build](https://github.com/yourusername/mercury-platform/actions/workflows/ci.yml/badge.svg)
-![License](https://img.shields.io/badge/license-MIT-green)
+3. Run tests:
+```bash
+dotnet test MercuryPlatform.sln
 ```
 
----
+4. Run individual services:
+```bash
+# Orders API
+cd src/Services/Orders/Orders.API
+dotnet run
 
-### 📜 License
+# Inventory API
+cd src/Services/Inventory/Inventory.API
+dotnet run
 
-This project is licensed under the [MIT License](LICENSE).
+# Payments API
+cd src/Services/Payments/Payments.API
+dotnet run
 
----
+# Checkout API
+cd src/Services/Checkout/Checkout.API
+dotnet run
+```
 
-### 🌌 Inspiration
+## 📊 Service Ports
 
-Mercury, the messenger of the gods, symbolizes **speed, communication, and reliability** — exactly what modern distributed backends strive for.
+| Service | Port |
+|---------|------|
+| Orders API | 5001 |
+| Inventory API | 5002 |
+| Payments API | 5003 |
+| Checkout API | 5004 |
+| PostgreSQL | 5432 |
+| MongoDB | 27017 |
+| Redis | 6379 |
+| RabbitMQ | 5672 |
+| RabbitMQ Management | 15672 |
+
+## 🏛️ Clean Architecture Layers
+
+### Domain Layer
+- Contains enterprise business rules
+- Entities with business logic
+- Value objects
+- Domain events
+- No dependencies on other layers
+
+### Application Layer
+- Contains application business rules
+- CQRS Commands and Queries
+- Command/Query Handlers (MediatR)
+- DTOs and AutoMapper profiles
+- Interfaces for infrastructure
+- Depends only on Domain layer
+
+### Infrastructure Layer
+- Contains infrastructure concerns
+- Database contexts (EF Core, MongoDB)
+- Repository implementations
+- Message broker integrations
+- External service clients
+- Depends on Application and Domain layers
+
+### API Layer
+- Contains API endpoints
+- Dependency injection configuration
+- Middleware pipeline
+- Serilog configuration
+- Depends on Application and Infrastructure layers
+
+## 🔄 CQRS Pattern
+
+Each service implements CQRS using MediatR:
+
+```csharp
+// Command
+public class CreateOrderCommand : IRequest<OrderDto>
+{
+    public string CustomerId { get; set; }
+    public List<OrderItemDto> Items { get; set; }
+}
+
+// Command Handler
+public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, OrderDto>
+{
+    public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
+    {
+        // Business logic here
+    }
+}
+```
+
+## 📨 Event-Driven Communication
+
+Services communicate asynchronously using RabbitMQ:
+
+- **OrderCreated**: Published when an order is created
+- **InventoryReserved**: Published when inventory is reserved
+- **PaymentProcessed**: Published when payment is processed
+- **CheckoutCompleted**: Published when checkout is completed
+
+## 🧪 Testing
+
+Run all tests:
+```bash
+dotnet test MercuryPlatform.sln
+```
+
+Run tests with coverage:
+```bash
+dotnet test MercuryPlatform.sln --collect:"XPlat Code Coverage"
+```
+
+## 📝 Logging
+
+All services use Serilog for structured logging:
+- Console sink for development
+- File sink for production
+- Enriched with context information
+
+## 🔧 Configuration
+
+Each service can be configured via `appsettings.json` or environment variables:
+
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Host=localhost;Database=mercury_orders;Username=mercury;Password=mercury123"
+  },
+  "RabbitMQ": {
+    "HostName": "localhost",
+    "UserName": "mercury",
+    "Password": "mercury123"
+  },
+  "Redis": {
+    "Configuration": "localhost:6379"
+  }
+}
+```
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 👥 Authors
+
+- **EsdrasRR** - [GitHub Profile](https://github.com/EsdrasRR)
+
+## 🙏 Acknowledgments
+
+- Clean Architecture by Robert C. Martin
+- Domain-Driven Design by Eric Evans
+- CQRS pattern by Greg Young

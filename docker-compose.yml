@@ -1,0 +1,203 @@
+version: '3.8'
+
+services:
+  # PostgreSQL for Orders and Payments services
+  postgres:
+    image: postgres:16-alpine
+    container_name: mercury-postgres
+    environment:
+      POSTGRES_USER: mercury
+      POSTGRES_PASSWORD: mercury123
+      POSTGRES_DB: mercury
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - mercury-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U mercury"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # MongoDB for Inventory and Checkout services
+  mongodb:
+    image: mongo:7.0
+    container_name: mercury-mongodb
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: mercury
+      MONGO_INITDB_ROOT_PASSWORD: mercury123
+      MONGO_INITDB_DATABASE: mercury
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - mercury-network
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/mercury --quiet
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Redis for caching
+  redis:
+    image: redis:7-alpine
+    container_name: mercury-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - mercury-network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # RabbitMQ for message broker
+  rabbitmq:
+    image: rabbitmq:3.12-management-alpine
+    container_name: mercury-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: mercury
+      RABBITMQ_DEFAULT_PASS: mercury123
+    ports:
+      - "5672:5672"   # AMQP port
+      - "15672:15672" # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - mercury-network
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Orders API
+  orders-api:
+    build:
+      context: .
+      dockerfile: src/Services/Orders/Orders.API/Dockerfile
+    container_name: mercury-orders-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=mercury_orders;Username=mercury;Password=mercury123
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=mercury
+      - RabbitMQ__Password=mercury123
+      - Redis__Configuration=redis:6379
+    ports:
+      - "5001:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mercury-network
+
+  # Inventory API
+  inventory-api:
+    build:
+      context: .
+      dockerfile: src/Services/Inventory/Inventory.API/Dockerfile
+    container_name: mercury-inventory-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDB__ConnectionString=mongodb://mercury:mercury123@mongodb:27017
+      - MongoDB__DatabaseName=mercury_inventory
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=mercury
+      - RabbitMQ__Password=mercury123
+      - Redis__Configuration=redis:6379
+    ports:
+      - "5002:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mercury-network
+
+  # Payments API
+  payments-api:
+    build:
+      context: .
+      dockerfile: src/Services/Payments/Payments.API/Dockerfile
+    container_name: mercury-payments-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=mercury_payments;Username=mercury;Password=mercury123
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=mercury
+      - RabbitMQ__Password=mercury123
+      - Redis__Configuration=redis:6379
+    ports:
+      - "5003:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - mercury-network
+
+  # Checkout Orchestrator API
+  checkout-api:
+    build:
+      context: .
+      dockerfile: src/Services/Checkout/Checkout.API/Dockerfile
+    container_name: mercury-checkout-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:8080
+      - MongoDB__ConnectionString=mongodb://mercury:mercury123@mongodb:27017
+      - MongoDB__DatabaseName=mercury_checkout
+      - RabbitMQ__HostName=rabbitmq
+      - RabbitMQ__UserName=mercury
+      - RabbitMQ__Password=mercury123
+      - Redis__Configuration=redis:6379
+      - Services__OrdersApi=http://orders-api:8080
+      - Services__InventoryApi=http://inventory-api:8080
+      - Services__PaymentsApi=http://payments-api:8080
+    ports:
+      - "5004:8080"
+    depends_on:
+      mongodb:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      orders-api:
+        condition: service_started
+      inventory-api:
+        condition: service_started
+      payments-api:
+        condition: service_started
+    networks:
+      - mercury-network
+
+networks:
+  mercury-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  mongodb_data:
+  redis_data:
+  rabbitmq_data:
