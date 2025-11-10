@@ -69,14 +69,23 @@ flowchart LR
 ### 🔁 Core Features
 
 ✅ Distributed event-driven communication
+
 ✅ CQRS + DDD with isolated bounded contexts
+
 ✅ Reliable event publishing (with outbox pattern)
+
 ✅ Sagas for long-running orchestration (Order → Payment → Inventory)
+
 ✅ Retry, Circuit Breaker, Idempotency
+
 ✅ Redis caching and distributed locks
+
 ✅ OpenTelemetry tracing and metrics
+
 ✅ Integration tests using Testcontainers
+
 ✅ Containerized environment with docker-compose
+
 ✅ CI/CD pipeline with GitHub Actions
 
 ---
