@@ -36,7 +36,6 @@ namespace Orders.Infrastructure
 			item.ToTable("order_items");
 			item.HasKey(i => i.Id);
 			item.Property(i => i.Id).ValueGeneratedNever();
-			item.Property<Guid>("OrderId").IsRequired(); // shadow FK
 			item.Property(i => i.ProductId).IsRequired().HasMaxLength(100);
 			item.Property(i => i.Quantity).IsRequired();
 			item.Property(i => i.Price).HasColumnType("decimal(18,2)").IsRequired();
