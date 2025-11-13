@@ -3,15 +3,22 @@ namespace Orders.Domain.Entities;
 public class Order
 {
     public Guid Id { get; private set; }
-    public string CustomerId { get; private set; }
-    public DateTime CreatedAt { get; private set; }
+
+    public string CustomerId { get; private set; } = string.Empty;
+
+	public DateTime CreatedAt { get; private set; }
+
     public DateTime? UpdatedAt { get; private set; }
+
     public OrderStatus Status { get; private set; }
+
     public decimal TotalAmount { get; private set; }
-    public string ShippingAddress { get; private set; }
-    
-    private readonly List<OrderItem> _items = new();
-    public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
+
+    public string ShippingAddress { get; private set; } = string.Empty;
+
+	private readonly List<OrderItem> _items = [];
+
+	public IReadOnlyCollection<OrderItem> Items => _items.AsReadOnly();
 
     private Order() { } // For EF Core
 
@@ -63,9 +70,13 @@ public class Order
 public class OrderItem
 {
     public Guid Id { get; private set; }
+
     public Guid OrderId { get; private set; }
-    public string ProductId { get; private set; }
-    public int Quantity { get; private set; }
+
+    public string ProductId { get; private set; } = string.Empty;
+
+	public int Quantity { get; private set; }
+
     public decimal Price { get; private set; }
 
     private OrderItem() { } // For EF Core
