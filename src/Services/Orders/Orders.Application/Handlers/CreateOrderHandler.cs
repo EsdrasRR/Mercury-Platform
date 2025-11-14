@@ -9,18 +9,11 @@ using Shared.Contracts.Events;
 
 namespace Orders.Application.Handlers;
 
-public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDto>
+public class CreateOrderHandler(IOrderRepository repository, IMapper mapper, IEventPublisher publisher) : IRequestHandler<CreateOrderCommand, OrderDto>
 {
-	private readonly IOrderRepository _repository;
-	private readonly IMapper _mapper;
-	private readonly IEventPublisher _publisher;
-
-	public CreateOrderHandler(IOrderRepository repository, IMapper mapper, IEventPublisher publisher)
-	{
-		_repository = repository;
-		_mapper = mapper;
-		_publisher = publisher;
-	}
+	private readonly IOrderRepository _repository = repository;
+	private readonly IMapper _mapper = mapper;
+	private readonly IEventPublisher _publisher = publisher;
 
 	public async Task<OrderDto> Handle(CreateOrderCommand request, CancellationToken cancellationToken)
 	{
@@ -34,13 +27,23 @@ public class CreateOrderHandler : IRequestHandler<CreateOrderCommand, OrderDto>
 		await _repository.AddAsync(order, cancellationToken);
 		await _repository.SaveChangesAsync(cancellationToken);
 
-		var orderCreatedEvent = new OrderCreatedEvent()
+		var orderCreatedEvent = new OrderCreatedEvent
 		{
 			OrderId = order.Id,
 			CustomerId = order.CustomerId,
 			TotalAmount = order.TotalAmount,
-			Items = order.Items.Select(i => new Shared.Contracts.Events.OrderItemDto() { ProductId = i.ProductId, Quantity = i.Quantity, Price = i.Price }).ToList()
+			Items =
+			[
+				.. order.Items.Select(i =>
+					new Shared.Contracts.Events.OrderItemDto
+					{
+						ProductId = i.ProductId,
+						Quantity  = i.Quantity,
+						Price     = i.Price
+					})
+			]
 		};
+
 
 		_ = Task.Run(() => _publisher.PublishAsync(orderCreatedEvent), cancellationToken);
 

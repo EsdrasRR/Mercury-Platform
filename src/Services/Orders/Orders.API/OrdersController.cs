@@ -3,14 +3,13 @@ using Microsoft.AspNetCore.Mvc;
 using Orders.Application.Commands;
 using Orders.Infrastructure;
 
-namespace Orders.API.Controllers;
+namespace Orders.API;
 
 [ApiController]
 [Route("api/[controller]")]
-public class OrdersController : ControllerBase
+public class OrdersController(IMediator mediator) : ControllerBase
 {
-	private readonly IMediator _mediator;
-	public OrdersController(IMediator mediator) => _mediator = mediator;
+	private readonly IMediator _mediator = mediator;
 
 	[HttpPost]
 	public async Task<IActionResult> Create([FromBody] CreateOrderCommand command, CancellationToken ct)

@@ -31,7 +31,7 @@ public class CreateOrderHandlerTests
 		{
 			CustomerId = "cust-1",
 			ShippingAddress = "Rua A, 123",
-			Items = new List<CreateOrderItemDto>
+			Items = 
 			{
 				new() { ProductId = "prod-1", Quantity = 2, Price = 10m },
 				new() { ProductId = "prod-2", Quantity = 1, Price = 5m }
@@ -71,7 +71,7 @@ public class CreateOrderHandlerTests
 		{
 			CustomerId = "cust-2",
 			ShippingAddress = "Rua B, 456",
-			Items = new List<CreateOrderItemDto>()
+			Items = []
 		};
 
 		Order? capturedOrder = null;
@@ -106,10 +106,10 @@ public class CreateOrderHandlerTests
 		{
 			CustomerId = "cust-3",
 			ShippingAddress = "Rua C, 789",
-			Items = new List<CreateOrderItemDto>
-			{
+			Items =
+			[
 				new() { ProductId = "prod-3", Quantity = 3, Price = 15m }
-			}
+			]
 		};
 
 		Order? capturedOrder = null;

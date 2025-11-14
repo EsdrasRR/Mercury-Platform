@@ -8,7 +8,7 @@ public class OrderDto
     public string Status { get; set; } = string.Empty;
     public decimal TotalAmount { get; set; }
     public string ShippingAddress { get; set; } = string.Empty;
-    public List<OrderItemDto> Items { get; set; } = new();
+    public List<OrderItemDto> Items { get; set; } = [];
 }
 
 public class OrderItemDto
@@ -23,7 +23,7 @@ public class CreateOrderDto
 {
     public string CustomerId { get; set; } = string.Empty;
     public string ShippingAddress { get; set; } = string.Empty;
-    public List<CreateOrderItemDto> Items { get; set; } = new();
+    public List<CreateOrderItemDto> Items { get; set; } = [];
 }
 
 public class CreateOrderItemDto
