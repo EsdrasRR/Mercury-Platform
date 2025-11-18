@@ -25,10 +25,12 @@ public class OrdersDbContext(DbContextOptions<OrdersDbContext> options) : DbCont
 		order.Property(o => o.UpdatedAt);
 		order.HasIndex(o => o.CustomerId);
 		order.HasIndex(o => o.Status);
-		order.HasMany(typeof(OrderItem), "_items")
-				.WithOne()
-				.HasForeignKey("OrderId")
-				.OnDelete(DeleteBehavior.Cascade);
+		
+		order.Ignore(o => o.Items);
+		order.HasMany<OrderItem>("_items")
+			.WithOne()
+			.HasForeignKey(oi => oi.OrderId)
+			.OnDelete(DeleteBehavior.Cascade);
 
 		var item = modelBuilder.Entity<OrderItem>();
 		item.ToTable("order_items");
