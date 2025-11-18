@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Orders.Domain.Entities;
+using Orders.Application.Interfaces;
 
-namespace Orders.Infrastructure;
+namespace Orders.Infrastructure.Repositories;
 
 public class OrderRepository(OrdersDbContext db) : IOrderRepository
 {

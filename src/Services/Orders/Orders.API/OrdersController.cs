@@ -1,7 +1,7 @@
 ﻿using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Orders.Application.Commands;
-using Orders.Infrastructure;
+using Orders.Application.Interfaces;
 
 namespace Orders.API;
 

@@ -3,10 +3,10 @@ using Moq;
 using Orders.Application.Commands;
 using Orders.Application.DTOs;
 using Orders.Application.Handlers;
+using Orders.Application.Interfaces;
 using Orders.Application.Mappings;
 using Orders.Application.Messaging;
 using Orders.Domain.Entities;
-using Orders.Infrastructure;
 using Shared.Contracts.Events;
 
 namespace Orders.UnitTests.Handlers;
